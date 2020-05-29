@@ -151,8 +151,8 @@ END
 DECLARE @Subprice MONEY = @Price * @Quantity
 
 BEGIN TRAN addItemToCart
-    INSERT INTO tblCART(GamerID, GameID, PlatformID, CartQty, CartSubprice)
-    VALUES (@Cust_ID, @Game_ID, @Plat_ID, @Quantity, @Subprice)
+    INSERT INTO tblCART(GamerID, GameID, PlatformID, CartQty, CartSubprice, GamePrice)
+    VALUES (@Cust_ID, @Game_ID, @Plat_ID, @Quantity, @Subprice, @Price)
 
     IF @@ERROR<> 0 
     BEGIN 
@@ -197,11 +197,11 @@ BEGIN TRAN insertOrder
         RETURN
     END
 
-    INSERT INTO tblORDER_GAME (OrderID, PlatformID, GameID, OrderGameQty, OrderGameSubprice)
-        SELECT @Order_ID, PlatformID, GameID, SUM(CartQty), SUM(CartSubprice) 
+    INSERT INTO tblORDER_GAME (OrderID, PlatformID, GameID, OrderGameQty, OrderGameSubprice, GamePrice)
+        SELECT @Order_ID, PlatformID, GameID, SUM(CartQty), SUM(CartSubprice), GamePrice 
         FROM tblCART 
         WHERE GamerID = @Cust_ID 
-        GROUP BY PlatformID, GameID
+        GROUP BY PlatformID, GameID, GamePrice
     IF @@ERROR <> 0 
     BEGIN 
         PRINT('Error inserting Order Game content')
