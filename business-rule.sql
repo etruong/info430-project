@@ -67,3 +67,31 @@ ALTER TABLE tblORDER_GAME
 ADD CONSTRAINT CheckGamerMaturity 
 CHECK(dbo.checkGamerMature() = 0)
 GO 
+
+-- Business Rule: Children under age of 12 yo cannot buy games with keywords 'fighting' or 'guns' or 'shooting'
+CREATE FUNCTION fn_LimitChildrenGameType()
+RETURNS INT 
+AS 
+BEGIN 
+    DECLARE @RET INT = 0 
+    IF EXISTS (
+        SELECT * FROM tblGAMER AS g 
+            JOIN tblORDER AS o ON o.GamerID = g.GamerID
+            JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID 
+            JOIN tblGame AS ga ON ga.GameID = og.GameID
+            JOIN tblGAME_KEYWORD AS gk ON gk.GameID = ga.GameID 
+            JOIN tblKEYWORD AS k ON k.KeywordID = gk.KeywordID
+        WHERE (SELECT FLOOR(DATEDIFF(DAY, g.GamerDOB, GETDATE()) / 365.25)) < 12 
+        AND k.KeywordName IN ('Fighting', 'Guns', 'Shooting', 'Violence')
+    )
+    BEGIN 
+        SET @RET = 1
+    END
+    RETURN @RET
+END 
+GO 
+
+ALTER TABLE tblORDER_GAME 
+ADD CONSTRAINT LimitChildGameType 
+CHECK(dbo.fn_LimitChildrenGameType() = 0)
+GO 
