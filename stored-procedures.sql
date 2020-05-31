@@ -168,7 +168,8 @@ CREATE PROCEDURE processCart
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
-@Gender VARCHAR(50)
+@Gender VARCHAR(50),
+@PurchaseDate DATE
 AS 
 
 DECLARE @Cust_ID INT
@@ -188,7 +189,7 @@ END
 DECLARE @OrderSum MONEY = (SELECT SUM(CartSubprice) FROM tblCART WHERE GamerID = @Cust_ID)
 BEGIN TRAN insertOrder
     INSERT INTO tblORDER(OrderDate, OrderTotal)
-    VALUES (GETDATE(), @OrderSum)
+    VALUES (@PurchaseDate, @OrderSum)
 
     DECLARE @Order_ID INT = (SELECT SCOPE_IDENTITY())
     IF @Order_ID IS NULL 
