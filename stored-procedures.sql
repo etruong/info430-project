@@ -163,6 +163,66 @@ BEGIN TRAN addItemToCart
         COMMIT TRAN addItemToCart 
 GO 
 
+Alter PROCEDURE InsertGamer 
+@Fname VARCHAR(50),
+@Lname VARCHAR(50),
+@DOB DATE,
+@Username VARCHAR(50),
+@GenderName VARCHAR(50)
+AS
+
+DECLARE @Gender_ID INT = (SELECT GenderID FROM tblGENDER WHERE GenderName = @GenderName)
+IF @Gender_ID IS NULL 
+
+BEGIN 
+    RAISERROR('Gender ID cannot be null! Please input correct gender name', 11, 1)
+    RETURN
+END
+
+Insert into tblGAMER (GamerFname, GamerLname, GamerDOB, GamerUsername, GenderID) 
+VALUES (
+@Fname, @Lname, @DOB, @Username, @Gender_ID
+)
+GO
+
+CREATE PROCEDURE InsertGAMER_INTEREST
+@Fname VARCHAR(50),
+@Lname VARCHAR(50),
+@DOB DATE,
+@Gender VARCHAR(50),
+@Keyword VARCHAR(50)
+AS
+
+DECLARE @Gamer_ID INT, @Keyword_ID INT
+
+EXEC getGamerID
+@G_Fname = @Fname,
+@G_Lname = @Lname,
+@G_Gender = @Gender,
+@G_DOB = @DOB,
+@G_ID = @Gamer_ID OUTPUT
+IF @Gamer_ID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getKeywordID
+@KeyName = @Keyword,
+@KeyID = @Keyword_ID OUTPUT 
+IF @Keyword_ID IS NULL 
+BEGIN 
+    RAISERROR('Keyword ID cannot be null!', 11, 1)
+    RETURN
+END
+
+Insert into tblGAMER_INTEREST(GamerID, KeywordID) 
+VALUES (
+@Gamer_ID, @Keyword_ID
+)
+GO
+
+
 -- PROCESS CART PROCEDURE
 CREATE PROCEDURE processCart 
 @Fname VARCHAR(50),

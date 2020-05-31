@@ -44,8 +44,25 @@ SELECT (DATEDIFF(DD, g.GamerDOB, GETDATE()) / 365.25) AS Age
 FROM tblGAMER AS g
 GO 
 
-SELECT 
 -- Num ordered
 -- Popular Game
+CREATE VIEW tblTOP10_POP_GAME
+AS
+SELECT TOP 10 G.GameID, G.GameName, COUNT(OG.GameID) AS totalOrderNum
+FROM tblGAME G
+JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
+GROUP BY G.GameID, G.GameName
+ORDER BY COUNT(OG.GameID)
+GO
+--TOP Regions sales
+CREATE VIEW tblTOP_3_REGION_SALES
+AS
+SELECT TOP 3 R.RegionID, R.RegionName, SUM(GRS.GameSalesNum) AS totalSales
+FROM tblREGION R
+JOIN tblGAME_REGION_SALES GRS ON R.RegionID = GRS.RegionID
+GROUP BY R.RegionID, R.RegionName
+ORDER BY SUM(GRS.GameSalesNum)
+
+
 -- Popular Genre
 -- Popular Perspective
