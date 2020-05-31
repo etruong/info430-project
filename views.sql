@@ -40,12 +40,32 @@ GO
 
 CREATE VIEW tblMOST_POPULAR_BY_AGE
 AS 
-SELECT (DATEDIFF(DD, g.GamerDOB, GETDATE()) / 365.25) AS Age
+SELECT g.GamerAge, SUM(og.OrderGameQty) AS NumGameOrdered, sq1.GenreTypeName, sq2.PerpName
 FROM tblGAMER AS g
+    JOIN tblOrder AS o ON o.GamerID = g.GamerID
+    JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+    JOIN (
+        SELECT g.GamerAge, gt.GenreTypeName, SUM(og.OrderGameQty) AS NumOrder, 
+            RANK() OVER (PARTITION BY gt.GenreTypeName ORDER BY SUM(og.OrderGameQty)) AS GenreRank
+        FROM tblGAMER AS g 
+            JOIN tblOrder AS o ON o.GamerID = g.GamerID
+            JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+            JOIN tblGAME AS ga ON ga.GameID = og.GameID 
+            JOIN tblGENRE_TYPE AS gt ON gt.GenreTypeID = ga.GenreTypeID
+        GROUP BY g.GamerAge, gt.GenreTypeName
+    ) AS sq1 ON sq1.GamerAge = g.GamerAge 
+    JOIN (
+        SELECT g.GamerAge, p.PerpName, SUM(og.OrderGameQty) AS NumOrder, 
+            RANK() OVER (PARTITION BY p.PerpName ORDER BY SUM(og.OrderGameQty)) AS PerpRank
+        FROM tblGAMER AS g 
+            JOIN tblOrder AS o ON o.GamerID = g.GamerID
+            JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+            JOIN tblGAME AS ga ON ga.GameID = og.GameID
+            JOIN tblPERSPECTIVE AS p ON p.PerpID = ga.PerpID
+        GROUP BY g.GamerAge, p.PerpName
+    ) AS sq2 ON sq2.GamerAge = g.GamerAge
+WHERE 
+    PerpRank = 1 AND 
+    GenreRank = 1
+GROUP BY g.GamerAge, sq1.GenreTypeName, sq2.PerpName
 GO 
-
-SELECT 
--- Num ordered
--- Popular Game
--- Popular Genre
--- Popular Perspective
