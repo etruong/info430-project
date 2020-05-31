@@ -6,6 +6,8 @@ USE info430_gp10_VideoGame
 GO 
 
 -- LOOK UP PROCEDURES
+
+
 CREATE PROCEDURE getGameID
 @GName VARCHAR(50),
 @GID INT OUTPUT 
@@ -27,6 +29,14 @@ CREATE PROCEDURE getPlatformID
 AS 
 SET @PID = (SELECT PlatformID FROM tblPlatform 
     WHERE PlatformName = @PName)
+GO
+
+CREATE PROCEDURE getGenderID
+@GName VARCHAR(50),
+@GID INT OUTPUT
+AS 
+SET @GID = (SELECT GenderID FROM tblGender 
+    WHERE GenderName = @GName)
 GO
 
 CREATE PROCEDURE getLanguageID 
@@ -93,6 +103,9 @@ SET @PRate_ID = (SELECT ParentRateID
 				FROM tblPARENT_RATE
 				WHERE @PRateName = ParentRateName)
 GO
+
+CREATE PROCEDURE getOrderID
+@
 
 -- INSERT PROCEDURES
 CREATE PROCEDURE insertCartItem
@@ -214,3 +227,112 @@ PRINT @@RowCount
     DELETE FROM tblCART 
     WHERE GamerID = @Cust_ID
 GO
+
+------- Marcus ------
+-- tblGAME: InsertGame
+CREATE PROCEDURE insertGame
+@GName varchar(50),
+@GReleaseDate DATE,
+@LSupport INT,
+@GDescription varchar(100),
+@PRateName varchar(30),
+@PerName varchar(30),
+@GeTName varchar(30)
+
+AS
+DECLARE @GT_ID INT, @P_ID INT, @PR_ID INT
+
+EXEC getGenreTypeID
+@GTypeName = @GeTName,
+@GType_ID = @GT_ID OUTPUT
+IF @GT_ID IS NULL
+BEGIN
+	RAISERROR('GenreTypeID cannot be null', 11,1)
+	RETURN
+END
+
+EXEC getParentRateID
+@PRateName = @PrateName,
+@PRate_ID = @PR_ID OUTPUT
+IF @PR_ID IS NULL
+BEGIN
+	RAISERROR('ParentRateID cannot be null', 11,1)
+	RETURN
+END
+
+EXEC getPerspective
+@PerName = @PerName,
+@PerID = @P_ID OUTPUT
+IF @P_ID IS NULL
+BEGIN
+	RAISERROR('PerspectiveID cannot be null', 11,1)
+	RETURN
+END
+--computed columns are price range and avg rating
+
+BEGIN TRAN addGame
+	INSERT INTO tblGAME(GameName, GenreTypeID, GameReleaseDate, /*GameAvgRating,*/ GameNumLanguagesSupport, /*priceRange,*/GameDescription, PerpID, ParentRateID)
+	VALUES (@GName, @GT_ID, @GReleaseDate, /*rating,*/ @LSupport, /*pricerange*/ @GDescription, @P_ID, @PR_ID)
+	
+	IF @@ERROR<> 0
+	BEGIN
+		PRINT('Ran into error while inserting a game')
+		ROLLBACK TRAN addGame
+	END
+	ELSE
+		COMMIT TRAN addGame
+GO
+
+
+-- tblREVIEW: InsertReview
+CREATE PROCEDURE insertREVIEW
+@RRating float,
+@RContent varchar(255),
+@RDate DATE,
+@GameName varchar(50),
+@GamerFname varchar(50),
+@GamerLname varchar(50),
+@GamerBday DATE,
+@OrderDate DATE, 
+@PlatformName varchar(50),
+@Gender varchar(50)
+AS
+DECLARE @OG_ID INT, @O_ID INT, @GR_ID INT, @G_ID INT, @P_ID INT
+
+
+EXEC getGameID
+@Gname = @GameName,
+@GID = @G_ID OUTPUT
+IF @G_ID IS NULL 
+BEGIN 
+    RAISERROR('Game ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getPlatformID
+@PName = @PlatformName,
+@PID = @P_ID OUTPUT
+IF @P_ID IS NULL 
+BEGIN 
+    RAISERROR('Platform ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getGamerID
+@G_Fname = @GamerFname,
+@G_Lname = @GamerLname,
+@G_Gender = @Gender,
+@G_DOB = @GamerBday,
+@G_ID = @GR_ID OUTPUT
+IF @GR_ID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+
+
+
+
+
+
+

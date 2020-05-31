@@ -95,3 +95,52 @@ ALTER TABLE tblORDER_GAME
 ADD CONSTRAINT LimitChildGameType 
 CHECK(dbo.fn_LimitChildrenGameType() = 0)
 GO 
+
+
+
+------------------- marcus ----------------------
+-- Price cannot be negative (Order total)
+CREATE FUNCTION fn_noNegativeOrderTotal()
+RETURNS INT 
+AS 
+BEGIN
+	DECLARE @RET INT = 0
+	IF EXISTS(
+		SELECT * FROM tblORDER O
+		WHERE O.OrderTotal < 0
+	)
+	BEGIN
+		SET @RET = 1
+	END
+	RETURN @RET
+END
+GO
+
+ALTER TABLE tblORDER
+ADD CONSTRAINT noNegativeOrderTotal
+CHECK (dbo.fn_noNegativeOrderTotal() = 0)
+GO
+
+
+
+-- Price cannot be negative (OrderGameSubprice)
+CREATE FUNCTION fn_noNegativeOrderGameSubprice()
+RETURNS INT 
+AS 
+BEGIN
+	DECLARE @RET INT = 0
+	IF EXISTS(
+		SELECT * FROM tblORDER_GAME OG
+		WHERE OG.OrderGameSubprice < 0
+	)
+	BEGIN
+		SET @RET = 1
+	END
+	RETURN @RET
+END
+GO
+
+ALTER TABLE tblORDER_GAME
+ADD CONSTRAINT noNegativeOrderGameSubprice
+CHECK (dbo.fn_noNegativeOrderGameSubprice() = 0)
+GO

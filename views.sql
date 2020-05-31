@@ -44,8 +44,42 @@ SELECT (DATEDIFF(DD, g.GamerDOB, GETDATE()) / 365.25) AS Age
 FROM tblGAMER AS g
 GO 
 
-SELECT 
+--SELECT 
 -- Num ordered
 -- Popular Game
 -- Popular Genre
 -- Popular Perspective
+
+
+
+CREATE VIEW topGameByGender
+AS
+SELECT G.GameName, 
+	GT.GenreTypeName, 
+	GE.GenderName
+
+
+FROM tblGAME G
+	JOIN tblGENRE_TYPE GT ON G.GenreTypeID = GT.GenreTypeID
+	JOIN tblGAME_KEYWORD GK ON G.GameID = GK.GameID
+	JOIN tblKEYWORD K ON GK.KeywordID = K.KeywordID
+	JOIN tblGAMER_INTEREST GI ON K.KeywordID = GI.KeywordID
+	JOIN tblGAMER GA ON GI.GamerID = GA.GamerID
+	JOIN tblGENDER GE ON GA.GenderID = GE.GenderID
+
+GROUP BY G.GameName, 
+	GT.GenreTypeName, 
+	GE.GenderName
+
+
+CREATE VIEW topGameByName
+AS 
+SELECT G.GameName, 
+	GT.GenreTypeName,
+	GA.GamerFname,
+	GA.GamerLname
+FROM tblGAME G
+	JOIN tblKEYWORD K ON GK.KeywordID = K.KeywordID
+	JOIN tblGAMER_INTEREST GI ON K.KeywordID = GI.KeywordID
+	JOIN tblGAMER GA ON GI.GamerID = GA.GamerID
+
