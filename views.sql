@@ -1,6 +1,14 @@
 USE info430_gp10_VideoGame
 GO 
 
+--------------------
+-- BUSINESS RULES --
+--------------------
+
+---------------------------
+-- Creator: Elisa Truong --
+---------------------------
+
 CREATE VIEW tblGAME_INFO 
 AS 
 SELECT
@@ -40,22 +48,41 @@ GO
 
 CREATE VIEW tblMOST_POPULAR_BY_AGE
 AS 
-SELECT (DATEDIFF(DD, g.GamerDOB, GETDATE()) / 365.25) AS Age
+SELECT g.GamerAge, SUM(og.OrderGameQty) AS NumGameOrdered, sq1.GenreTypeName, sq2.PerpName
 FROM tblGAMER AS g
+    JOIN tblOrder AS o ON o.GamerID = g.GamerID
+    JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+    JOIN (
+        SELECT g.GamerAge, gt.GenreTypeName, SUM(og.OrderGameQty) AS NumOrder, 
+            RANK() OVER (PARTITION BY gt.GenreTypeName ORDER BY SUM(og.OrderGameQty)) AS GenreRank
+        FROM tblGAMER AS g 
+            JOIN tblOrder AS o ON o.GamerID = g.GamerID
+            JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+            JOIN tblGAME AS ga ON ga.GameID = og.GameID 
+            JOIN tblGENRE_TYPE AS gt ON gt.GenreTypeID = ga.GenreTypeID
+        GROUP BY g.GamerAge, gt.GenreTypeName
+    ) AS sq1 ON sq1.GamerAge = g.GamerAge 
+    JOIN (
+        SELECT g.GamerAge, p.PerpName, SUM(og.OrderGameQty) AS NumOrder, 
+            RANK() OVER (PARTITION BY p.PerpName ORDER BY SUM(og.OrderGameQty)) AS PerpRank
+        FROM tblGAMER AS g 
+            JOIN tblOrder AS o ON o.GamerID = g.GamerID
+            JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
+            JOIN tblGAME AS ga ON ga.GameID = og.GameID
+            JOIN tblPERSPECTIVE AS p ON p.PerpID = ga.PerpID
+        GROUP BY g.GamerAge, p.PerpName
+    ) AS sq2 ON sq2.GamerAge = g.GamerAge
+WHERE 
+    PerpRank = 1 AND 
+    GenreRank = 1
+GROUP BY g.GamerAge, sq1.GenreTypeName, sq2.PerpName
 GO 
 
-<<<<<<< HEAD
-=======
---SELECT 
--- Num ordered
--- Popular Game
--- Popular Genre
--- Popular Perspective
+---------------------------
+-- Creator: Marcus Huang --
+---------------------------
 
-
---------- Marcus -------------
 -- Most popular games by gender
->>>>>>> c72416d7fb8bd8b9f973653fb2a895ea98ce31d7
 CREATE VIEW topGameByGender
 AS
 SELECT G.GameName, 
@@ -74,14 +101,9 @@ FROM tblGAME G
 GROUP BY G.GameName, 
 	GT.GenreTypeName, 
 	GE.GenderName
-<<<<<<< HEAD
-GO 
-
-=======
 GO
 
 -- Most popular games by name (specifically Kyles)
->>>>>>> c72416d7fb8bd8b9f973653fb2a895ea98ce31d7
 CREATE VIEW topGameByName
 AS 
 SELECT G.GameName, 
@@ -96,9 +118,6 @@ FROM tblGAME G
 	JOIN tblKEYWORD K ON GK.KeywordID = K.KeywordID
 	JOIN tblGAMER_INTEREST GI ON K.KeywordID = GI.KeywordID
 	JOIN tblGAMER GA ON GI.GamerID = GA.GamerID
-<<<<<<< HEAD
-GO 
-=======
 	JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
 WHERE GA.GamerFname = 'Kyle'
 GROUP BY G.GameName, 
@@ -107,4 +126,28 @@ GROUP BY G.GameName,
 	GA.GamerLname
 GO
 
->>>>>>> c72416d7fb8bd8b9f973653fb2a895ea98ce31d7
+------------------------
+-- Creator: Angel Lin --
+------------------------
+
+-- Create View: Top 3 Platforms -- 
+CREATE VIEW vTop3Platforms
+AS 
+SELECT TOP 3 P.PlatformName, COUNT(GP.GamePlatformID) AS NumGamePlatform,
+DENSE_RANK() OVER (ORDER BY COUNT(GP.GamePlatformID) DESC) AS RankPopularPlatform
+FROM tblPlatform AS P 
+	JOIN tblGamePlatform AS GP ON P.PlatformID = GP.PlatformID
+GROUP BY P.PlatformName
+GO
+
+-- Create View: Top Developers -- 
+CREATE VIEW vTop3Developers
+AS
+SELECT TOP 3 D.DeveloperName, SUM (OG.GamePrice) AS GameRevenue,
+DENSE_RANK() OVER (ORDER BY SUM (OG.GamePrice) DESC) AS RankGameRevenue
+FROM tblDeveloper AS D
+	JOIN tblDeveloper_Game AS DG ON D.DeveloperID = DG.DeveloperID
+	JOIN tblGame AS G ON DG.GameID = G.GameID
+	JOIN tblOrder_Game AS OG ON G.GameID = OG.GameID 
+GROUP BY D.DeveloperName
+GO
