@@ -10,6 +10,11 @@ EXEC insertGame
 @GeTName = 'Simulation'
 GO 
 
+EXEC insGamePlatform
+@GN = 'Animal Crossing: New Horizons',
+@PN = 'Switch',
+@ReleaseDate = 'March 20, 2020'
+
 EXEC insertGame
 @GName = 'Animal Crossing: New Leaf',
 @GReleaseDate = 'November 8, 2012',
@@ -18,6 +23,11 @@ EXEC insertGame
 @PerName = 'Aerial',
 @GeTName = 'Simulation'
 GO 
+
+EXEC insGamePlatform
+@GN = 'Animal Crossing: New Leaf',
+@PN = '3DS',
+@ReleaseDate = 'November 8, 2012'
 
 EXEC insertGame
 @GName = 'Animal Crossing: Wild World',
@@ -28,7 +38,16 @@ EXEC insertGame
 @GeTName = 'Simulation'
 GO 
 
-SELECT * FROM tempGameInfo
+EXEC insGamePlatform
+@GN = 'Animal Crossing: Wild World',
+@PN = '3DS',
+@ReleaseDate = 'November 23, 2005'
+
+EXEC insGamePlatform
+@GN = 'Animal Crossing: Wild World',
+@PN = 'Wii U',
+@ReleaseDate = 'November 30, 2005'
+
 DECLARE @TempTable TABLE (
     ID INT IDENTITY PRIMARY KEY,
     GameName VARCHAR(50),
@@ -88,7 +107,7 @@ BEGIN
     DECLARE @RAND_DATE DATE;
     IF @P2 IS NOT NULL 
     BEGIN 
-        SET @RAND_DATE = (SELECT DATEADD(DD, -(SELECT RAND() * 365), @GReD))
+        SET @RAND_DATE = (SELECT DATEADD(DD, (SELECT RAND() * 10), @GReD))
         EXEC insGamePlatform
         @GN = @GN,
         @PN = @P2,
@@ -97,7 +116,7 @@ BEGIN
 
     IF @P3 IS NOT NULL 
     BEGIN 
-        SET @RAND_DATE = (SELECT DATEADD(DD, -(SELECT RAND() * 365), @GReD))
+        SET @RAND_DATE = (SELECT DATEADD(DD, (SELECT RAND() * 10), @GReD))
         EXEC insGamePlatform
         @GN = @GN,
         @PN = @P3,
@@ -106,7 +125,7 @@ BEGIN
 
     IF @P4 IS NOT NULL 
     BEGIN 
-        SET @RAND_DATE = (SELECT DATEADD(DD, -(SELECT RAND() * 365), @GReD))
+        SET @RAND_DATE = (SELECT DATEADD(DD, (SELECT RAND() * 10), @GReD))
         EXEC insGamePlatform
         @GN = @GN,
         @PN = @P4,
@@ -119,4 +138,10 @@ BEGIN
     SET @NumRow = @NumRow - 1
 END
 
-SELECT * FROM tblGAME
+-- Restart?
+-- DELETE FROM tblGamePlatform
+-- DELETE FROM tblGame
+-- DBCC CHECKIDENT (tblGamePlatform, RESEED, 0)
+-- DBCC CHECKIDENT (tblGame, RESEED, 0)
+
+SELECT * FROM tblGamePlatform

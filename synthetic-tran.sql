@@ -62,3 +62,85 @@ BEGIN
 
     SET @RUN = @RUN - 1
 END 
+GO 
+
+CREATE PROCEDURE wrapper_insertPlatPrice 
+AS 
+
+DECLARE @GameRow INT = (SELECT COUNT(*) FROM tblGAME)
+
+WHILE @GameRow > 0
+BEGIN 
+    DECLARE @tempTable TABLE (
+        GamePlatformID INT,
+        GameID INT,
+        PlatformID INT, 
+        PlatformReleaseDate DATE,
+        CurrentPrice MONEY
+    )
+    INSERT INTO @tempTable
+        SELECT * FROM tblGamePlatform WHERE GameID = @GameRow
+    DECLARE @GameName VARCHAR(50) = (SELECT DISTINCT GameName FROM tblGAME WHERE GameID = @GameRow)
+
+    WHILE (SELECT COUNT(*) FROM @tempTable) > 0
+    BEGIN 
+        DECLARE @MIN_PK INT = (SELECT MIN(GamePlatformID) FROM @tempTable)
+        DECLARE @PlatformName VARCHAR(50) = (SELECT p.PlatformName FROM tblPlatform AS p 
+            JOIN @tempTable AS gp ON p.PlatformID = gp.PlatformID WHERE gp.GamePlatformID = @MIN_PK)
+        DECLARE @GameRelease DATE = (SELECT PlatformReleaseDate FROM @tempTable WHERE GamePlatformID = @MIN_PK)
+        DECLARE @EndSale DATE = (SELECT DATEADD(DD, (SELECT RAND() * 100 + 1), @GameRelease))
+        DECLARE @Price MONEY =  CASE 
+                                    WHEN @PlatformName = 'PC' THEN '35.00'
+                                    WHEN @PlatformName = 'Wii U' THEN '20.00'
+                                    WHEN @PlatformName = 'PlayStation' THEN '40.00'
+                                    WHEN @PlatformName = 'Playstation' THEN '40.00'
+                                    WHEN @PlatformName = 'Mac' THEN '35.00'
+                                    WHEN @PlatformName = 'Switch' THEN '60.00'
+                                    WHEN @PlatformName = '3DS' THEN '30.00'
+                                    WHEN @PlatformName = '2DS' THEN '30.00'
+                                    WHEN @PlatformName = 'Xbox' THEN '60.00'
+                                END
+        IF @EndSale BETWEEN @GameRelease AND GETDATE()
+        BEGIN 
+            EXEC insPlatformPriceHistory
+            @G_Name = @GameName,
+            @P_Name = @PlatformName,
+            @H_Price = @Price,
+            @H_SDate = @GameRelease,
+            @H_EDate = @EndSale
+
+            DECLARE @NewPrice MONEY = (@Price - 10.00)
+
+            EXEC insPlatformPriceHistory
+            @G_Name = @GameName,
+            @P_Name = @PlatformName,
+            @H_Price = @NewPrice,
+            @H_SDate = @GameRelease,
+            @H_EDate = NULL
+        END 
+        ELSE 
+        BEGIN 
+            EXEC insPlatformPriceHistory
+            @G_Name = @GameName,
+            @P_Name = @PlatformName,
+            @H_Price = @Price,
+            @H_SDate = @GameRelease,
+            @H_EDate = NULL
+        END
+
+        DELETE FROM @tempTable 
+        WHERE GamePlatformID = @MIN_PK
+    END 
+
+    SET @GameRow = @GameRow - 1
+END
+GO
+
+EXEC wrapper_insertPlatPrice
+
+SELECT * FROM tblPlatform_Price_History
+GO 
+
+-- Restart:
+-- DELETE FROM tblPlatform_Price_History
+-- DBCC CHECKIDENT (tblPlatform_Price_History, RESEED, 0)

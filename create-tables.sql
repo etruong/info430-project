@@ -393,7 +393,7 @@ CREATE TABLE dbo.tblPlatform_Price_History (
 	GamePlatformID int Not Null,
 	HistoryPrice Money Not Null,
 	HistoryStart Date Not Null,
-    HistoryEnd Date Not Null,
+    HistoryEnd Date,
 	-- HistoryCurrent Bit Not Null, (Computed)
 	FOREIGN KEY(GamePlatformID)	REFERENCES tblGamePlatform(GamePlatformID)
 )

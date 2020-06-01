@@ -16,7 +16,7 @@ AS
 BEGIN
     DECLARE @RET BIT = 0
     DECLARE @CurrentDate DATE = (SELECT GETDATE())
-    IF (@CurrentDate BETWEEN @START AND @END)
+    IF (@End IS NULL OR @CurrentDate BETWEEN @START AND @END)
     BEGIN 
         SET @RET = 1
     END 
@@ -35,7 +35,10 @@ AS
 BEGIN 
     DECLARE @MAX MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice DESC)
     DECLARE @MIN MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice ASC)
-    DECLARE @RET VARCHAR(50) = (SELECT CONCAT(@MAX, ' - ', @MIN))
+	DECLARE @RET VARCHAR(50)
+	IF @MAX IS NULL AND @MIN IS NULL 
+		RETURN NULL
+    SET @RET = (SELECT CONCAT(@MAX, ' - ', @MIN))
     RETURN @RET
 END
 GO 
@@ -75,7 +78,7 @@ BEGIN
 	DECLARE @RET INT = (SELECT PPH.HistoryPrice
 						FROM tblGamePlatform GP
 						JOIN tblPlatform_Price_History PPH ON GP.GamePlatformID = PPH.GamePlatformID
-						WHERE HistoryCurrent = 1	
+						WHERE HistoryCurrent = 1 AND GP.GamePlatformID = @GamePlatformID
 	)
 	RETURN @RET
 END
