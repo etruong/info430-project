@@ -51,14 +51,15 @@ GO
 -- Popular Perspective
 
 
-
+--------- Marcus -------------
+-- Most popular games by gender
 CREATE VIEW topGameByGender
 AS
 SELECT G.GameName, 
 	GT.GenreTypeName, 
-	GE.GenderName
-
-
+	GE.GenderName,
+	SUM(OG.OrderGameQty) AS NumGameOrdered,
+	RANK() OVER(PARTITION BY GE.GenderName ORDER BY SUM(OG.OrderGameQty)) AS GenderRank
 FROM tblGAME G
 	JOIN tblGENRE_TYPE GT ON G.GenreTypeID = GT.GenreTypeID
 	JOIN tblGAME_KEYWORD GK ON G.GameID = GK.GameID
@@ -66,20 +67,32 @@ FROM tblGAME G
 	JOIN tblGAMER_INTEREST GI ON K.KeywordID = GI.KeywordID
 	JOIN tblGAMER GA ON GI.GamerID = GA.GamerID
 	JOIN tblGENDER GE ON GA.GenderID = GE.GenderID
-
+	JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
 GROUP BY G.GameName, 
 	GT.GenreTypeName, 
 	GE.GenderName
+GO
 
-
+-- Most popular games by name (specifically Kyles)
 CREATE VIEW topGameByName
 AS 
 SELECT G.GameName, 
 	GT.GenreTypeName,
 	GA.GamerFname,
-	GA.GamerLname
+	GA.GamerLname,
+	SUM(OG.OrderGameQty) AS NumGameOrdered,
+	RANK() OVER(ORDER BY SUM(OG.OrderGameQty)) AS NameRank
 FROM tblGAME G
+	JOIN tblGENRE_TYPE GT ON G.GenreTypeID = GT.GenreTypeID
+	JOIN tblGAME_KEYWORD GK ON G.GameID = GK.GameID
 	JOIN tblKEYWORD K ON GK.KeywordID = K.KeywordID
 	JOIN tblGAMER_INTEREST GI ON K.KeywordID = GI.KeywordID
 	JOIN tblGAMER GA ON GI.GamerID = GA.GamerID
+	JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
+WHERE GA.GamerFname = 'Kyle'
+GROUP BY G.GameName, 
+	GT.GenreTypeName,
+	GA.GamerFname,
+	GA.GamerLname
+GO
 
