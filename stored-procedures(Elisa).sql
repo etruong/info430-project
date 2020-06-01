@@ -6,6 +6,38 @@ USE info430_gp10_VideoGame
 GO 
 
 -- LOOK UP PROCEDURES
+CREATE PROCEDURE getOrderID
+@GFname varchar(50),
+@GLname varchar(50),
+@Gender varchar(50),
+@GDOB DATE,
+@ODate DATE,
+@OTotal numeric (5,2),
+@OID INT OUTPUT
+AS
+DECLARE @GmerID INT
+EXEC getGamerID
+@G_Fname = @GFname,
+@G_Lname = @GLname,
+@G_Gender = @Gender,
+@G_DOB = @GDOB,
+@G_ID = @GmerID OUTPUT
+IF @GmerID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+SET @OID = (SELECT OrderID 
+				FROM tblORDER 
+				WHERE GamerID = @GmerID
+				AND OrderDate = @ODate
+				AND OrderTotal = @OTotal
+				)
+GO
+			
+
+
+
 
 
 CREATE PROCEDURE getGameID
@@ -268,8 +300,8 @@ END
 --computed columns are price range and avg rating
 
 BEGIN TRAN addGame
-	INSERT INTO tblGAME(GameName, GenreTypeID, GameReleaseDate, /*GameAvgRating,*/ /*priceRange,*/GameDescription, PerpID, ParentRateID)
-	VALUES (@GName, @GT_ID, @GReleaseDate, /*rating,*/ /*pricerange*/ @GDescription, @P_ID, @PR_ID)
+	INSERT INTO tblGAME(GameName, GenreTypeID, GameReleaseDate, GameDescription, PerpID, ParentRateID)
+	VALUES (@GName, @GT_ID, @GReleaseDate, @GDescription, @P_ID, @PR_ID)
 	
 	IF @@ERROR<> 0
 	BEGIN
@@ -294,38 +326,36 @@ CREATE PROCEDURE insertREVIEW
 @PlatformName varchar(50),
 @Gender varchar(50)
 AS
-DECLARE @OG_ID INT, @O_ID INT, @GR_ID INT, @G_ID INT, @P_ID INT
+DECLARE @OG_ID INT
 
-
-EXEC getGameID
-@Gname = @GameName,
-@GID = @G_ID OUTPUT
-IF @G_ID IS NULL 
-BEGIN 
-    RAISERROR('Game ID cannot be null!', 11, 1)
-    RETURN
-END
-
-EXEC getPlatformID
+EXEC getOrderGameID
+@GName = @GameName,
 @PName = @PlatformName,
-@PID = @P_ID OUTPUT
-IF @P_ID IS NULL 
-BEGIN 
-    RAISERROR('Platform ID cannot be null!', 11, 1)
-    RETURN
+@FName = @GamerFname,
+@LName = @GamerLname,
+@Gender = @Gender,
+@BDate = @GamerBday,
+@ODate = @OrderDate,
+@OGID = @OG_ID OUTPUT
+IF @OG_ID IS NULL
+BEGIN
+	RAISERROR('ParentRateID cannot be null', 11,1)
+	RETURN
 END
 
-EXEC getGamerID
-@G_Fname = @GamerFname,
-@G_Lname = @GamerLname,
-@G_Gender = @Gender,
-@G_DOB = @GamerBday,
-@G_ID = @GR_ID OUTPUT
-IF @GR_ID IS NULL 
-BEGIN 
-    RAISERROR('Gamer ID cannot be null!', 11, 1)
-    RETURN
-END
+BEGIN TRAN addReview
+	INSERT INTO tblREVIEW(OrderGameID, ReviewRating, ReviewContent, ReviewDate)
+	VALUES (@OG_ID, @RRating, @RContent, @RDate)
+	
+	IF @@ERROR<> 0
+	BEGIN
+		PRINT('Ran into error while inserting a game')
+		ROLLBACK TRAN addReview
+	END
+	ELSE
+		COMMIT TRAN addReview
+GO
+
 
 
 

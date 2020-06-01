@@ -46,20 +46,36 @@ CREATE FUNCTION numGamesBought(@GamerID INT)
 RETURNS INT
 AS
 BEGIN
-	DECLARE @GAMESINORDER INT = (SELECT COUNT(DISTINCT OG.GameID)
+	DECLARE @RET INT = (SELECT COUNT(DISTINCT OG.GameID)
 									FROM tblORDER_GAME OG
 										JOIN tblORDER O ON OG.OrderID = O.OrderID
 										JOIN tblGAMER G ON O.GamerID = G.GamerID
 										WHERE O.GamerID = @GamerID)
-	DECLARE @CURRENTNUMGAMES INT = (SELECT G.NumBought
-										FROM tblGAMER G)
-	DECLARE @RET INT = (SELECT @GAMESINORDER + @CURRENTNUMGAMES)
 	RETURN @RET			
 END
 GO
 
 ALTER TABLE tblGAMER
-ADD NumBought AS dbo.numGamesBought(@GamerID)
+ADD NumBought 
+AS dbo.numGamesBought(GamerID)
 GO
 
 --GameCurrentPrice (GamePlatform table)
+CREATE FUNCTION gameCurrentPrice(@GamePlatformID INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @RET INT = (SELECT PPH.HistoryPrice
+						FROM tblGamePlatform GP
+						JOIN tblPlatform_Price_History PPH ON GP.GamePlatformID = PPH.GamePlatformID
+						WHERE HistoryCurrent = 1	
+	)
+	RETURN @RET
+END
+GO
+
+ALTER TABLE tblGamePlatform
+ADD CurrentPrice
+AS dbo.gameCurrentPrice(GamePlatformID)
+GO
+
