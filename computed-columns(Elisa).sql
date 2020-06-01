@@ -39,3 +39,27 @@ GO
 ALTER TABLE tblGAME 
 ADD PriceRange AS dbo.PriceRange(GameID)
 GO
+
+------- Marcus
+--NumOfGamesBought (Gamer Table) — must be unique
+CREATE FUNCTION numGamesBought(@GamerID INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @GAMESINORDER INT = (SELECT COUNT(DISTINCT OG.GameID)
+									FROM tblORDER_GAME OG
+										JOIN tblORDER O ON OG.OrderID = O.OrderID
+										JOIN tblGAMER G ON O.GamerID = G.GamerID
+										WHERE O.GamerID = @GamerID)
+	DECLARE @CURRENTNUMGAMES INT = (SELECT G.NumBought
+										FROM tblGAMER G)
+	DECLARE @RET INT = (SELECT @GAMESINORDER + @CURRENTNUMGAMES)
+	RETURN @RET			
+END
+GO
+
+ALTER TABLE tblGAMER
+ADD NumBought AS dbo.numGamesBought(@GamerID)
+GO
+
+--GameCurrentPrice (GamePlatform table)

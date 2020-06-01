@@ -11,8 +11,11 @@ GO
 CREATE TABLE tblPERSPECTIVE
     (PerpID INT IDENTITY(1,1) primary key,
     PerpName varchar(20),
-    PerpDescription varchar(200))
+    PerpDescription varchar(600))
 GO
+
+ALTER TABLE tblPERSPECTIVE
+ALTER COLUMN PerpDescription VARCHAR(600)
 
 CREATE TABLE tblLANGUAGE
     (LanguageID INT IDENTITY(1,1) primary key,
@@ -36,7 +39,7 @@ GO
 CREATE TABLE tblGENRE_TYPE(
 	GenreTypeID INT IDENTITY(1,1) PRIMARY KEY,
 	GenreTypeName VARCHAR(20),
-	GenreTypeDescription VARCHAR(50)
+	GenreTypeDescription VARCHAR(100)
 );
 GO
 
@@ -150,8 +153,8 @@ GO
 
 INSERT INTO tblPERSPECTIVE(PerpName, PerpDescription)
 VALUES
-    ('First Person','First person perspective allow you to view the game world through the main characters field of vision. This can vary from a viewpoint inside a cockpit of a plane, inside a vehicle of a racing game or the main type which is looking through a player�s viewpoint in a first person shooter. Call of Duty for example, allows you to view through the main character�s field of vision and allows you to see and experience what your character is going through, meaning that you are fully immersed into the game.'),
-    ('Third Person','Third-person is a perspective in which the player can visibly see the body of the controlled gamer. The camera angle for third person games are mainly placed from an aerial view behind the character. Furthermore, third person perspective allows you to view more of the terrain and allows you to see enemies at all times, even when under cover. Third person games either place the player on the left hand side of the screen and may be fixed behind the character; as a result, not being able to see the characters face. Whereas most third person games place the character in the centre of the screen where you are able to pan the camera around them'),
+    ('First Person','First person perspective allow you to view the game world through the main characters field of vision.'),
+    ('Third Person','Third-person is a perspective in which the player can visibly see the body of the controlled gamer. The camera angle for third person games are mainly placed from an aerial view behind the character.'),
     ('Aerial','Aerial is a birds eye viewpoint which is an elevated view of the character from above. This camera angle is used in video games that shows the characters and the area around them from above. it is most often used in 2D role playing video games and simulation games'),
     ('2D Scrolling','2D perspective view is a game which is built on a simple platform which uses a 2D view from the side which shows the character moving through the game world. an example of a game which uses a 2D viewpoint is ''Sonic the Hedgehog'' or ''Mario''. Games like these mostly consists of a player moving from the left hand side of the screen and defeating obstacles on the right hand side of the screen whilst moving towards the right. '),
     ('3 dimensional','Popular among puzzle and building games. Allows users to change position and view of whatever they are building.')
