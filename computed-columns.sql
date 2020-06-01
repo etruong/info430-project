@@ -1,6 +1,6 @@
 USE info430_gp10_VideoGame
 GO
-
+ 
 ----------------------
 -- COMPUTED COLUMNS --
 ----------------------
