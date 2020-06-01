@@ -40,31 +40,6 @@ BEGIN
 END
 GO 
 
-CREATE FUNCTION AverageReview(@GameID INT)
-RETURNS FLOAT
-AS
-BEGIN
-	RETURN (SELECT AVG(ReviewRating)
-	FROM tblGAME G
-	JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
-	JOIN tblREVIEW R ON R.OrderGameID = OG.OrderGameID
-	WHERE G.GameID = @GameID
-	)
-END
-GO
-
-CREATE FUNCTION LanguageNum(@GameID INT)
-RETURNS INT
-AS
-BEGIN
-	RETURN (SELECT COUNT(GameLanguageID)
-	FROM tblGAME G
-	JOIN tblGAME_LANGUAGE GL ON G.GameID = GL.GameID
-	WHERE G.GameID = @GameID
-	)
-END
-GO
-
 ALTER TABLE tblGAME 
 ADD PriceRange AS dbo.PriceRange(GameID)
 GO
@@ -138,12 +113,37 @@ BEGIN
 END
 GO
 
+ALTER TABLE tblGAMER
+ADD recentBoughtGame AS dbo.recentBoughtGame(GamerID)
+GO
+
 -----------------------
 -- Creator: Andi Ren --
 -----------------------
 
-ALTER TABLE tblGAMER
-ADD recentBoughtGame AS dbo.recentBoughtGame(GamerID)
+CREATE FUNCTION AverageReview(@GameID INT)
+RETURNS FLOAT
+AS
+BEGIN
+	RETURN (SELECT AVG(ReviewRating)
+	FROM tblGAME G
+	JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
+	JOIN tblREVIEW R ON R.OrderGameID = OG.OrderGameID
+	WHERE G.GameID = @GameID
+	)
+END
+GO
+
+CREATE FUNCTION LanguageNum(@GameID INT)
+RETURNS INT
+AS
+BEGIN
+	RETURN (SELECT COUNT(GameLanguageID)
+	FROM tblGAME G
+	JOIN tblGAME_LANGUAGE GL ON G.GameID = GL.GameID
+	WHERE G.GameID = @GameID
+	)
+END
 GO
 
 ALTER TABLE tblGAME
