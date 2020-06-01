@@ -129,8 +129,6 @@ ADD CONSTRAINT noNegativeOrderTotal
 CHECK (dbo.fn_noNegativeOrderTotal() = 0)
 GO
 
-
-
 -- Price cannot be negative (OrderGameSubprice)
 CREATE FUNCTION fn_noNegativeOrderGameSubprice()
 RETURNS INT 
@@ -164,12 +162,12 @@ AS
 BEGIN
 	DECLARE @RET INT = 0
 	IF EXISTS (
-		SELECT * FROM tblGAMER AS G 
+		SELECT COUNT(O.GamerID) FROM tblGAMER AS G 
             JOIN tblORDER AS O ON O.GamerID = G.GamerID
             JOIN tblORDER_GAME AS OG ON OG.OrderID = O.OrderID
 			JOIN tblREVIEW AS R ON R.OrderGameID = OG.OrderGameID
 		WHERE G.GamerID = @PK
-		HAVING COUNT(*) > 3
+		HAVING COUNT(O.GamerID) > 3
 	)
 	BEGIN 
 		SET @RET = 1
@@ -186,3 +184,7 @@ GO
 -- Business rule: Quantity Cannot be negative in OrderGame Table -- 
 ALTER TABLE tblORDER_GAME
 ADD CONSTRAINT check_order_positive CHECK (OrderGameQty> 0);
+
+-----------------------
+-- Creator: Andi Ren --
+-----------------------
