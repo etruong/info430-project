@@ -54,6 +54,7 @@ JOIN tblORDER_GAME OG ON G.GameID = OG.GameID
 GROUP BY G.GameID, G.GameName
 ORDER BY COUNT(OG.GameID)
 GO
+
 --TOP Regions sales
 CREATE VIEW tblTOP_3_REGION_SALES
 AS
@@ -62,7 +63,6 @@ FROM tblREGION R
 JOIN tblGAME_REGION_SALES GRS ON R.RegionID = GRS.RegionID
 GROUP BY R.RegionID, R.RegionName
 ORDER BY SUM(GRS.GameSalesNum)
-
 
 -- Popular Genre
 -- Popular Perspective

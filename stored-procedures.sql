@@ -94,6 +94,66 @@ SET @PRate_ID = (SELECT ParentRateID
 				WHERE @PRateName = ParentRateName)
 GO
 
+ALTER PROCEDURE getOrderGameID
+@GName VARCHAR(50),
+@PName VARCHAR(50),
+@Fname VARCHAR(50),
+@Lname VARCHAR(50),
+@Gender VARCHAR(50),
+@BDate	DATE,
+@ODate	DATE,
+@OTotal NUMERIC (5,2),
+@OGID INT OUTPUT
+AS
+
+DECLARE @GID INT, @PID INT, @OID INT
+
+EXEC getGameID
+@GName = @GName,
+@GID = @GID OUTPUT 
+IF @GID IS NULL 
+BEGIN 
+    RAISERROR('Game ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getPlatformID
+@PName = @PName,
+@PID = @PID OUTPUT
+IF @PID IS NULL 
+BEGIN 
+    RAISERROR('Platform ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getOrderID
+@GFname = @Fname,
+@GLname = @Lname,
+@Gender = @Gender,
+@GDOB   = @BDate,
+@ODate	= @ODate,
+@OTotal = @OTotal,
+@OID	= @OID OUTPUT
+IF @OID IS NULL 
+BEGIN 
+    RAISERROR('ORDER ID cannot be null!', 11, 1)
+    RETURN
+END
+
+SET @OGID = (
+SELECT OrderGameID
+FROM tblORDER_GAME
+WHERE GameID = @GID
+AND OrderID = @OID
+AND PlatformID = @PID
+)
+
+GO
+
+
+
+
+
 -- INSERT PROCEDURES
 CREATE PROCEDURE insertCartItem
 @Fname VARCHAR(50),
