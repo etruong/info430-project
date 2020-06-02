@@ -173,9 +173,3 @@ FROM tblREGION R
 JOIN tblGAME_REGION_SALES GRS ON R.RegionID = GRS.RegionID
 GROUP BY R.RegionID, R.RegionName
 ORDER BY SUM(GRS.GameSalesNum)
-<<<<<<< HEAD
-
--- Popular Genre
--- Popular Perspective
-=======
->>>>>>> 84fe76fcb62ae53f8a636ef481b7547ca363e65f

@@ -6,7 +6,7 @@ USE info430_gp10_VideoGame
 GO 
 
 -- LOOK UP PROCEDURES
-CREATE PROCEDURE getGameID
+ALTER PROCEDURE getGameID
 @GName VARCHAR(50),
 @GID INT OUTPUT 
 AS
@@ -14,14 +14,14 @@ SET @GID = (SELECT GameID FROM tblGAME
     WHERE GameName = @GName)
 GO 
 
-CREATE PROCEDURE getKeywordID 
+ALTER PROCEDURE getKeywordID 
 @KeyName VARCHAR(50),
 @KeyID INT OUTPUT 
 AS 
 SET @KeyID = (SELECT KeywordID FROM tblKEYWORD WHERE KeywordName = @KeyName)
 GO
 
-CREATE PROCEDURE getPlatformID
+ALTER PROCEDURE getPlatformID
 @PName VARCHAR(50),
 @PID INT OUTPUT
 AS 
@@ -29,7 +29,7 @@ SET @PID = (SELECT PlatformID FROM tblPlatform
     WHERE PlatformName = @PName)
 GO
 
-CREATE PROCEDURE getGenderID
+ALTER PROCEDURE getGenderID
 @GName VARCHAR(50),
 @GID INT OUTPUT
 AS 
@@ -37,7 +37,7 @@ SET @GID = (SELECT GenderID FROM tblGender
     WHERE GenderName = @GName)
 GO
 
-CREATE PROCEDURE getLanguageID 
+ALTER PROCEDURE getLanguageID 
 @LangName VARCHAR(50),
 @LangID INT OUTPUT 
 AS 
@@ -45,7 +45,7 @@ SET @LangID = (SELECT LanguageID FROM tblLANGUAGE
     WHERE LanguageName = @LangName)
 GO 
 
-CREATE PROCEDURE getGamerID 
+ALTER PROCEDURE getGamerID 
 @G_Fname VARCHAR(50),
 @G_Lname VARCHAR(50),
 @G_Gender VARCHAR(50),
@@ -67,7 +67,7 @@ SET @G_ID = (SELECT GamerID FROM tblGAMER
     GenderID = @Gender_ID)
 GO
 
-CREATE PROCEDURE getPerspective
+Alter PROCEDURE getPerspective
 @PerName VARCHAR(50),
 @PerID INT OUTPUT 
 AS 
@@ -75,7 +75,7 @@ SET @PerID = (SELECT PerpID FROM tblPERSPECTIVE
     WHERE PerpName = @PerName)
 GO 
 
-CREATE PROCEDURE getRegionID
+Alter PROCEDURE getRegionID
 @RegName VARCHAR(20),
 @Reg_ID INT OUTPUT
 AS
@@ -84,7 +84,7 @@ SET @Reg_ID = (SELECT RegionID
 			  WHERE @RegName = RegionName)
 GO
 
-CREATE PROCEDURE getGenreTypeID
+Alter PROCEDURE getGenreTypeID
 @GTypeName VARCHAR(20),
 @GType_ID INT OUTPUT
 AS
@@ -93,7 +93,7 @@ SET @GType_ID = (SELECT GenreTypeID
 			  WHERE @GTypeName = GenreTypeName)
 GO
 
-CREATE PROCEDURE getParentRateID
+Alter PROCEDURE getParentRateID
 @PRateName VARCHAR(20),
 @PRate_ID INT OUTPUT
 AS
@@ -102,7 +102,6 @@ SET @PRate_ID = (SELECT ParentRateID
 				WHERE @PRateName = ParentRateName)
 GO
 
-<<<<<<< HEAD
 ALTER PROCEDURE getOrderGameID
 @GName VARCHAR(50),
 @PName VARCHAR(50),
@@ -162,8 +161,7 @@ GO
 
 
 
-=======
-CREATE PROCEDURE getOrderID
+Alter PROCEDURE getOrderID
 @GFname varchar(50),
 @GLname varchar(50),
 @Gender varchar(50),
@@ -195,10 +193,9 @@ GO
 ---------------------------
 -- Creator: Elisa Truong --
 ---------------------------
->>>>>>> 84fe76fcb62ae53f8a636ef481b7547ca363e65f
 
 -- INSERT PROCEDURES
-CREATE PROCEDURE insertCartItem
+Alter PROCEDURE insertCartItem
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -288,7 +285,7 @@ VALUES (
 )
 GO
 
-CREATE PROCEDURE InsertGAMER_INTEREST
+Alter PROCEDURE InsertGAMER_INTEREST
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -327,7 +324,7 @@ GO
 
 
 -- PROCESS CART PROCEDURE
-CREATE PROCEDURE processCart 
+Alter PROCEDURE processCart 
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -384,7 +381,7 @@ GO
 ---------------------------
 
 -- tblGAME: InsertGame
-CREATE PROCEDURE insertGame
+Alter PROCEDURE insertGame
 @GName varchar(50),
 @GReleaseDate DATE,
 @GDescription varchar(100),
@@ -437,17 +434,18 @@ GO
 
 
 -- tblREVIEW: InsertReview
-CREATE PROCEDURE insertREVIEW
-@RRating float,
-@RContent varchar(255),
-@RDate DATE,
-@GameName varchar(50),
-@GamerFname varchar(50),
-@GamerLname varchar(50),
-@GamerBday DATE,
-@OrderDate DATE, 
-@PlatformName varchar(50),
-@Gender varchar(50)
+ALTER PROCEDURE insertREVIEW
+@RRating		float,
+@RContent		varchar(255),
+@RDate			DATE,
+@GameName		varchar(50),
+@GamerFname		varchar(50),
+@GamerLname		varchar(50),
+@GamerBday		DATE,
+@OrderDate		DATE, 
+@PlatformName	varchar(50),
+@Gender			varchar(50),
+@OTotal			numeric(5,2)
 AS
 DECLARE @OG_ID INT
 
@@ -459,6 +457,7 @@ EXEC getOrderGameID
 @Gender = @Gender,
 @BDate = @GamerBday,
 @ODate = @OrderDate,
+@OTotal = @OTotal,
 @OGID = @OG_ID OUTPUT
 IF @OG_ID IS NULL
 BEGIN
@@ -551,7 +550,7 @@ BEGIN TRAN addPlatformPriceHistory
 GO 
 
 -- Insert Procedure: tblGamePlatform --
-CREATE PROCEDURE insGamePlatform
+Alter PROCEDURE insGamePlatform
 @GN VARCHAR(50),
 @PN VARCHAR(50),
 @ReleaseDate DATE
@@ -616,7 +615,7 @@ VALUES (
 )
 GO
 
-CREATE PROCEDURE InsertGAMER_INTEREST
+Alter PROCEDURE InsertGAMER_INTEREST
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -652,3 +651,4 @@ VALUES (
 @Gamer_ID, @Keyword_ID
 )
 GO
+
