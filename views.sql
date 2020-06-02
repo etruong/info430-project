@@ -152,6 +152,16 @@ FROM tblDeveloper AS D
 GROUP BY D.DeveloperName
 GO
 
+-- Create View: Region Sales -- 
+CREATE VIEW tblTOP_4_REGION_SALES
+AS
+SELECT TOP 4 R.RegionID, R.RegionName, SUM(GRS.GameSalesNum) AS totalSales
+FROM tblREGION R
+JOIN tblGAME_REGION_SALES GRS ON R.RegionID = GRS.RegionID
+GROUP BY R.RegionID, R.RegionName
+ORDER BY SUM(GRS.GameSalesNum) 
+GO
+
 -----------------------
 -- Creator: Andi Ren --
 -----------------------
