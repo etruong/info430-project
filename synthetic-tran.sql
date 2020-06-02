@@ -78,21 +78,6 @@ GO
 -- GO 
 
 ---------------------
--- Generates reviews 
--- 
--- insertREVIEW
--- @RRating float,
--- @RContent varchar(255),
--- @RDate DATE,
--- @GameName varchar(50),
--- @GamerFname varchar(50),
--- @GamerLname varchar(50),
--- @GamerBday DATE,
--- @OrderDate DATE, 
--- @PlatformName varchar(50),
--- @Gender varchar(50)
-
----------------------
 -- Generates price values for every game platform pair in the tblGame_Platform
 -- 
 CREATE PROCEDURE wrapper_insertPlatPrice 
@@ -233,5 +218,79 @@ GO
 -- DBCC CHECKIDENT (tblGAMER_INTEREST, RESEED, 0)
 
 
+---------------------
+-- Generates reviews
+-- 
+CREATE PROCEDURE Wrapper_insert_review
+@runs INT
+AS
 
+DECLARE @OrderGameRowCount INT = (SELECT COUNT(*) FROM tblORDER_GAME)
 
+DECLARE @OrderGameID INT
+
+DECLARE 
+@Rating			float,
+@RatingContent	varchar(255),
+@RatingDate		DATE,
+@GName			varchar(50),
+@Fname			varchar(50),
+@Lname			varchar(50),
+@Bday			DATE,
+@ODate			DATE, 
+@PName			varchar(50),
+@Gender			varchar(50),
+@OTotal			numeric(5,2),
+@GID			INT,
+@OID			INT,
+@PID			INT,
+@CID			INT,
+@GenderID		INT
+
+While @runs > 0
+BEGIN
+	SET @runs = @runs - 1
+	SET @OrderGameID = (SELECT RAND() * @OrderGameRowCount + 1)
+	
+	SET @GID = (SELECT GameID FROM tblORDER_GAME WHERE OrderGameID = @OrderGameID)
+	SET @OID = (SELECT OrderID FROM tblORDER_GAME WHERE OrderGameID = @OrderGameID)
+	SET @PID = (SELECT PlatformID FROM tblORDER_GAME WHERE OrderGameID = @OrderGameID)
+	
+	SET @CID = (SELECT GamerID FROM tblORDER WHERE OrderID = @OID)
+
+	SET @Gname = (SELECT GameName FROM tblGAME WHERE GameID = @GID)
+	SET @Fname = (SELECT GamerFname FROM tblGAMER WHERE GamerID = @CID)
+	SET @Lname = (SELECT GamerLName FROM tblGAMER WHERE GamerID = @CID)
+	SET @Bday = (SELECT GamerDOB FROM tblGAMER WHERE GamerID = @CID)
+	SET @GenderID = (SELECT GenderID FROM tblGAMER WHERE GamerID = @CID)
+	SET @Gender = (SELECT GenderName FROM tblGENDER WHERE GenderID = @GenderID)
+	
+	SET @ODate = (SELECT OrderDate FROM tblORDER WHERE OrderID = @OID)
+	SET @Ototal = (SELECT OrderTotal FROM tblORDER WHERE OrderID = @OID)
+
+	SET @PName = (SELECT PlatformName FROM tblPlatform WHERE PlatformID = @PID)
+
+	SET @RatingDate = (SELECT GetDate() - (SELECT RAND() * 300))
+	SET @RatingContent = 'This is a place holder review comment'
+	SET @Rating = RAND() * 10
+
+	EXEC insertREVIEW 
+	@RRating			= @Rating			
+	,@RContent			= @RatingContent	
+	,@RDate				= @RatingDate		
+	,@GameName			= @GName			
+	,@GamerFname		= @Fname			
+	,@GamerLname		= @Lname			
+	,@GamerBday			= @Bday			
+	,@OrderDate			= @ODate			
+	,@PlatformName		= @PName			
+	,@Gender			= @Gender			
+	,@OTotal			= @OTotal			
+
+END
+GO
+
+EXEC Wrapper_insert_review 
+@runs = 500
+
+SELECT * FROM tblREVIEW

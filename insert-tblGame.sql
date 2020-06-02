@@ -144,4 +144,69 @@ END
 -- DBCC CHECKIDENT (tblGamePlatform, RESEED, 0)
 -- DBCC CHECKIDENT (tblGame, RESEED, 0)
 
-SELECT * FROM tblGamePlatform
+SELECT * FROM tblPublisher
+SELECT * FROM tblGAME
+
+--insert data into bridge tables by Andi-- 
+
+DECLARE @games INT = (SELECT COUNT(*) FROM tblGAME)
+DECLARE @Dev INT, @Key INT, @Lan INT, @Reg INT, @Pub INT, @Sales Money
+
+While @games > 0
+BEGIN
+
+SET @Dev = FLOOR(RAND()*(6))+1
+SET @Key = FLOOR(RAND()*(31))+1
+SET @Lan = FLOOR(RAND()*(5))+1
+SET @Reg = FLOOR(RAND()*(5))+1
+SET @Pub = FLOOR(RAND()*(3))+1
+
+SET @Sales = CONVERT(MONEY,RAND()*1500000000)
+
+INSERT INTO tblDEVELOPER_GAME 
+(DeveloperID,
+GameID)
+VALUES
+(@Dev,
+@games)
+
+INSERT INTO tblGAME_KEYWORD 
+(KeywordID,
+GameID)
+VALUES
+(@Key,
+@games)
+
+INSERT INTO tblGAME_LANGUAGE
+(LanguageID,
+GameID)
+VALUES
+(@Lan,
+@games)
+
+INSERT INTO tblGAME_REGION_SALES
+(RegionID,
+GameID,
+GameSalesNum)
+VALUES
+(@Reg,
+@games,
+@Sales)
+
+INSERT INTO tblGamePublisher 
+(PublisherID,
+GameID)
+VALUES
+(@Pub,
+@games)
+
+SET @games = @games - 1
+END
+
+GO
+
+SELECT * FROM [dbo].[tblGAME_KEYWORD]
+SELECT * FROM [dbo].[tblGAME_LANGUAGE]
+SELECT * FROM [dbo].[tblGAME_REGION_SALES]
+SELECT * FROM [dbo].[tblGamePublisher]
+
