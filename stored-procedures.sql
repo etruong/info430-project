@@ -29,6 +29,14 @@ SET @PID = (SELECT PlatformID FROM tblPlatform
     WHERE PlatformName = @PName)
 GO
 
+CREATE PROCEDURE getGenderID
+@GName VARCHAR(50),
+@GID INT OUTPUT
+AS 
+SET @GID = (SELECT GenderID FROM tblGender 
+    WHERE GenderName = @GName)
+GO
+
 CREATE PROCEDURE getLanguageID 
 @LangName VARCHAR(50),
 @LangID INT OUTPUT 
@@ -94,6 +102,7 @@ SET @PRate_ID = (SELECT ParentRateID
 				WHERE @PRateName = ParentRateName)
 GO
 
+<<<<<<< HEAD
 ALTER PROCEDURE getOrderGameID
 @GName VARCHAR(50),
 @PName VARCHAR(50),
@@ -153,6 +162,40 @@ GO
 
 
 
+=======
+CREATE PROCEDURE getOrderID
+@GFname varchar(50),
+@GLname varchar(50),
+@Gender varchar(50),
+@GDOB DATE,
+@ODate DATE,
+@OTotal numeric (5,2),
+@OID INT OUTPUT
+AS
+DECLARE @GmerID INT
+EXEC getGamerID
+@G_Fname = @GFname,
+@G_Lname = @GLname,
+@G_Gender = @Gender,
+@G_DOB = @GDOB,
+@G_ID = @GmerID OUTPUT
+IF @GmerID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+SET @OID = (SELECT OrderID 
+				FROM tblORDER 
+				WHERE GamerID = @GmerID
+				AND OrderDate = @ODate
+				AND OrderTotal = @OTotal
+				)
+GO
+
+---------------------------
+-- Creator: Elisa Truong --
+---------------------------
+>>>>>>> 84fe76fcb62ae53f8a636ef481b7547ca363e65f
 
 -- INSERT PROCEDURES
 CREATE PROCEDURE insertCartItem
@@ -288,7 +331,8 @@ CREATE PROCEDURE processCart
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
-@Gender VARCHAR(50)
+@Gender VARCHAR(50),
+@PurchaseDate DATE
 AS 
 
 DECLARE @Cust_ID INT
@@ -308,7 +352,7 @@ END
 DECLARE @OrderSum MONEY = (SELECT SUM(CartSubprice) FROM tblCART WHERE GamerID = @Cust_ID)
 BEGIN TRAN insertOrder
     INSERT INTO tblORDER(OrderDate, OrderTotal)
-    VALUES (GETDATE(), @OrderSum)
+    VALUES (@PurchaseDate, @OrderSum)
 
     DECLARE @Order_ID INT = (SELECT SCOPE_IDENTITY())
     IF @Order_ID IS NULL 
@@ -333,4 +377,278 @@ BEGIN TRAN insertOrder
 PRINT @@RowCount
     DELETE FROM tblCART 
     WHERE GamerID = @Cust_ID
+GO
+
+---------------------------
+-- Creator: Marcus Huang --
+---------------------------
+
+-- tblGAME: InsertGame
+CREATE PROCEDURE insertGame
+@GName varchar(50),
+@GReleaseDate DATE,
+@GDescription varchar(100),
+@PRateName varchar(30),
+@PerName varchar(30),
+@GeTName varchar(30)
+
+AS
+DECLARE @GT_ID INT, @P_ID INT, @PR_ID INT
+
+EXEC getGenreTypeID
+@GTypeName = @GeTName,
+@GType_ID = @GT_ID OUTPUT
+IF @GT_ID IS NULL
+BEGIN
+	RAISERROR('GenreTypeID cannot be null', 11,1)
+	RETURN
+END
+
+EXEC getParentRateID
+@PRateName = @PrateName,
+@PRate_ID = @PR_ID OUTPUT
+IF @PR_ID IS NULL
+BEGIN
+	RAISERROR('ParentRateID cannot be null', 11,1)
+	RETURN
+END
+
+EXEC getPerspective
+@PerName = @PerName,
+@PerID = @P_ID OUTPUT
+IF @P_ID IS NULL
+BEGIN
+	RAISERROR('PerspectiveID cannot be null', 11,1)
+	RETURN
+END
+
+BEGIN TRAN addGame
+	INSERT INTO tblGAME(GameName, GenreTypeID, GameReleaseDate, GameDescription, PerpID, ParentRateID)
+	VALUES (@GName, @GT_ID, @GReleaseDate, @GDescription, @P_ID, @PR_ID)
+	
+	IF @@ERROR<> 0
+	BEGIN
+		PRINT('Ran into error while inserting a game')
+		ROLLBACK TRAN addGame
+	END
+	ELSE
+		COMMIT TRAN addGame
+GO
+
+
+-- tblREVIEW: InsertReview
+CREATE PROCEDURE insertREVIEW
+@RRating float,
+@RContent varchar(255),
+@RDate DATE,
+@GameName varchar(50),
+@GamerFname varchar(50),
+@GamerLname varchar(50),
+@GamerBday DATE,
+@OrderDate DATE, 
+@PlatformName varchar(50),
+@Gender varchar(50)
+AS
+DECLARE @OG_ID INT
+
+EXEC getOrderGameID
+@GName = @GameName,
+@PName = @PlatformName,
+@FName = @GamerFname,
+@LName = @GamerLname,
+@Gender = @Gender,
+@BDate = @GamerBday,
+@ODate = @OrderDate,
+@OGID = @OG_ID OUTPUT
+IF @OG_ID IS NULL
+BEGIN
+	RAISERROR('ParentRateID cannot be null', 11,1)
+	RETURN
+END
+
+BEGIN TRAN addReview
+	INSERT INTO tblREVIEW(OrderGameID, ReviewRating, ReviewContent, ReviewDate)
+	VALUES (@OG_ID, @RRating, @RContent, @RDate)
+	
+	IF @@ERROR<> 0
+	BEGIN
+		PRINT('Ran into error while inserting a game')
+		ROLLBACK TRAN addReview
+	END
+	ELSE
+		COMMIT TRAN addReview
+GO
+
+------------------------
+-- Creator: Angel Lin --
+------------------------
+
+
+-- Insert Procedure: tblPlatformPriceHistory --
+ALTER PROCEDURE getGamePlatformID
+@GN VARCHAR(50),
+@PN VARCHAR(50),
+@GPID INT OUTPUT
+As
+
+DECLARE @G_ID INT, @P_ID INT
+
+EXEC getGameID
+@GName = @GN,
+@GID = @G_ID OUTPUT
+IF @G_ID IS NULL
+BEGIN 
+	RAISERROR('Game ID cannot be null!', 11, 1)
+	RETURN
+END
+
+EXEC getPlatformID
+@PName = @PN,
+@PID = @P_ID OUTPUT
+IF @P_ID IS NULL
+BEGIN 
+	RAISERROR('Platform ID cannot be null!', 11, 1)
+	RETURN
+END
+
+SET @GPID = (SELECT GamePlatformID FROM tblGamePlatform
+			 WHERE GameID = @G_ID
+			 AND PlatformID = @P_ID)
+
+GO
+
+ALTER PROCEDURE insPlatformPriceHistory
+@G_Name VARCHAR(50),
+@P_Name VARCHAR(50),
+@H_Price MONEY,
+@H_SDate DATE,
+@H_EDate DATE
+AS
+
+DECLARE @GP_ID INT
+
+EXEC getGamePlatformID
+@GN = @G_Name,
+@PN = @P_Name,
+@GPID = @GP_ID OUTPUT
+IF @GP_ID IS NULL
+BEGIN 
+    RAISERROR('Game Platform ID cannot be null!', 11, 1)
+    RETURN
+END
+
+BEGIN TRAN addPlatformPriceHistory
+		INSERT INTO tblPlatform_Price_History(GamePlatformID, HistoryPrice, HistoryStart, HistoryEnd)
+		VALUES (@GP_ID, @H_Price, @H_SDate, @H_EDate)
+
+		IF @@ERROR<> 0 
+		BEGIN 
+			PRINT('Ran into error while adding item to platform price history!')
+			ROLLBACK TRAN addPlatformPriceHistory
+		END
+		ELSE 
+			COMMIT TRAN addPlatformPriceHistory
+GO 
+
+-- Insert Procedure: tblGamePlatform --
+CREATE PROCEDURE insGamePlatform
+@GN VARCHAR(50),
+@PN VARCHAR(50),
+@ReleaseDate DATE
+AS
+
+DECLARE @G_ID INT, @P_ID INT
+
+EXEC getGameID
+@GName = @GN,
+@GID = @G_ID OUTPUT
+IF @G_ID IS NULL
+BEGIN 
+	RAISERROR('Game ID cannot be null!', 11, 1)
+	RETURN
+END
+
+EXEC getPlatformID
+@PName = @PN,
+@PID = @P_ID OUTPUT
+IF @P_ID IS NULL
+BEGIN 
+	RAISERROR('Platform ID cannot be null!', 11, 1)
+	RETURN
+END
+
+BEGIN TRAN addToGamePlatform
+	INSERT INTO tblGamePlatform(GameID, PlatformID, PlatformReleaseDate)
+	VALUES (@G_ID, @P_ID, @ReleaseDate)
+
+	IF @@ERROR <> 0
+	BEGIN
+		PRINT('Ran into error while adding item to Game Platform!')
+		ROLLBACK TRAN addToGamePlatform
+	END
+	ELSE 
+		COMMIT TRAN addToGamePlatform
+GO
+
+-----------------------
+-- Creator: Andi Ren --
+-----------------------
+
+Alter PROCEDURE InsertGamer 
+@Fname VARCHAR(50),
+@Lname VARCHAR(50),
+@DOB DATE,
+@Username VARCHAR(50),
+@GenderName VARCHAR(50)
+AS
+
+DECLARE @Gender_ID INT = (SELECT GenderID FROM tblGENDER WHERE GenderName = @GenderName)
+IF @Gender_ID IS NULL 
+
+BEGIN 
+    RAISERROR('Gender ID cannot be null! Please input correct gender name', 11, 1)
+    RETURN
+END
+
+Insert into tblGAMER (GamerFname, GamerLname, GamerDOB, GamerUsername, GenderID) 
+VALUES (
+@Fname, @Lname, @DOB, @Username, @Gender_ID
+)
+GO
+
+CREATE PROCEDURE InsertGAMER_INTEREST
+@Fname VARCHAR(50),
+@Lname VARCHAR(50),
+@DOB DATE,
+@Gender VARCHAR(50),
+@Keyword VARCHAR(50)
+AS
+
+DECLARE @Gamer_ID INT, @Keyword_ID INT
+
+EXEC getGamerID
+@G_Fname = @Fname,
+@G_Lname = @Lname,
+@G_Gender = @Gender,
+@G_DOB = @DOB,
+@G_ID = @Gamer_ID OUTPUT
+IF @Gamer_ID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+
+EXEC getKeywordID
+@KeyName = @Keyword,
+@KeyID = @Keyword_ID OUTPUT 
+IF @Keyword_ID IS NULL 
+BEGIN 
+    RAISERROR('Keyword ID cannot be null!', 11, 1)
+    RETURN
+END
+
+Insert into tblGAMER_INTEREST(GamerID, KeywordID) 
+VALUES (
+@Gamer_ID, @Keyword_ID
+)
 GO
