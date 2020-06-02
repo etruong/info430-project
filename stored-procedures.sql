@@ -178,11 +178,9 @@ BEGIN
     RETURN
 END
 
-DECLARE @Price MONEY = (SELECT pph.HistoryPrice FROM tblPlatform_Price_History AS pph
-    JOIN tblGamePlatform AS gp ON gp.GamePlatformID = pph.GamePlatformID
+DECLARE @Price MONEY = (SELECT gp.CurrentPrice FROM tblGamePlatform AS gp
     WHERE gp.GameID = @Game_ID AND 
-    gp.PlatformID = @Plat_ID AND 
-    pph.HistoryCurrent = 'true')
+    gp.PlatformID = @Plat_ID)
 IF @Price IS NULL 
 BEGIN 
     RAISERROR('Price of game cannot be null', 11, 1)
@@ -263,7 +261,6 @@ VALUES (
 )
 GO
 
-
 -- PROCESS CART PROCEDURE
 CREATE PROCEDURE processCart 
 @Fname VARCHAR(50),
@@ -289,8 +286,8 @@ END
 
 DECLARE @OrderSum MONEY = (SELECT SUM(CartSubprice) FROM tblCART WHERE GamerID = @Cust_ID)
 BEGIN TRAN insertOrder
-    INSERT INTO tblORDER(OrderDate, OrderTotal)
-    VALUES (@PurchaseDate, @OrderSum)
+    INSERT INTO tblORDER(GamerID, OrderDate, OrderTotal)
+    VALUES (@Cust_ID, @PurchaseDate, @OrderSum)
 
     DECLARE @Order_ID INT = (SELECT SCOPE_IDENTITY())
     IF @Order_ID IS NULL 
@@ -312,7 +309,8 @@ BEGIN TRAN insertOrder
     ELSE 
         COMMIT TRAN insertOrder
     
-PRINT @@RowCount
+    DECLARE @SuccessMsg VARCHAR(100) = (SELECT CONCAT('Successfully inserted information for ', @FName, ' ', @LName))
+    PRINT(@SuccessMsg)
     DELETE FROM tblCART 
     WHERE GamerID = @Cust_ID
 GO
@@ -548,10 +546,18 @@ BEGIN
     RETURN
 END
 
-Insert into tblGAMER (GamerFname, GamerLname, GamerDOB, GamerUsername, GenderID) 
-VALUES (
-@Fname, @Lname, @DOB, @Username, @Gender_ID
-)
+BEGIN TRAN g1
+    Insert into tblGAMER (GamerFname, GamerLname, GamerDOB, GamerUsername, GenderID) 
+    VALUES (
+    @Fname, @Lname, @DOB, @Username, @Gender_ID
+    )
+    IF @@ERROR <> 0 
+    BEGIN 
+        PRINT('Error inserting gamer interest row')
+        ROLLBACK TRAN g1
+    END 
+    ELSE 
+        COMMIT TRAN g1
 GO
 
 CREATE PROCEDURE InsertGAMER_INTEREST
@@ -585,8 +591,16 @@ BEGIN
     RETURN
 END
 
-Insert into tblGAMER_INTEREST(GamerID, KeywordID) 
-VALUES (
-@Gamer_ID, @Keyword_ID
-)
+BEGIN TRAN g1 
+    Insert into tblGAMER_INTEREST(GamerID, KeywordID) 
+    VALUES (
+    @Gamer_ID, @Keyword_ID
+    )
+    IF @@ERROR <> 0 
+    BEGIN 
+        PRINT('Error inserting gamer interest row')
+        ROLLBACK TRAN g1
+    END 
+    ELSE 
+        COMMIT TRAN g1
 GO
