@@ -158,9 +158,6 @@ AND PlatformID = @PID
 
 GO
 
-
-
-
 Alter PROCEDURE getOrderID
 @GFname varchar(50),
 @GLname varchar(50),
@@ -179,7 +176,7 @@ EXEC getGamerID
 @G_ID = @GmerID OUTPUT
 IF @GmerID IS NULL 
 BEGIN 
-    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RAISERROR('Gamer ID cannot be null!', 11, 1)m 
     RETURN
 END
 SET @OID = (SELECT OrderID 
@@ -650,5 +647,55 @@ Insert into tblGAMER_INTEREST(GamerID, KeywordID)
 VALUES (
 @Gamer_ID, @Keyword_ID
 )
+GO
+
+ALTER PROCEDURE GetDeveloperID
+@DevName	varchar(50),
+@DevID		INT OUTPUT
+AS 
+SET @DevID = (SELECT DeveloperID FROM tblDEVELOPER WHERE DeveloperName = @DevName)
+GO
+
+ALTER PROCEDURE GetPublisherID
+@PubName	varchar(50),
+@PubID		INT OUTPUT
+AS 
+SET @PubID = (SELECT PublisherID FROM tblPublisher WHERE PublisherName = @PubName)
+GO
+
+ALTER PROCEDURE InsertDEVELOPER_GAME
+@DevName	VARCHAR(50),
+@GName		VARCHAR(50)
+AS
+
+DECLARE @GID INT, @DID INT
+
+EXEC getGameID 
+@GName = @GName,
+@GID = @GID OUTPUT
+
+IF @GID IS NULL
+BEGIN 
+    RAISERROR('Game ID is null', 11, 1)
+    RETURN
+END
+
+EXEC GetDeveloperID 
+@DevName = @DevName,
+@DevID = @DID OUTPUT
+
+IF @DID IS NULL
+BEGIN 
+    RAISERROR('Developer ID is null', 11, 1)
+    RETURN
+END
+
+INSERT INTO tblDEVELOPER_GAME 
+(DeveloperID,
+GameID)
+VALUES
+(@DID,
+@GID)
+
 GO
 
