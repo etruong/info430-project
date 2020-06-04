@@ -2,7 +2,7 @@
 -- STORED PROCEDURES --
 -----------------------
 
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
 
 ---------------------------
@@ -10,7 +10,7 @@ GO
 ---------------------------
 
 -- INSERT PROCEDURES
-Alter PROCEDURE insertCartItem
+CREATE PROCEDURE insertCartItem
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -77,7 +77,7 @@ BEGIN TRAN addItemToCart
 GO 
 
 -- PROCESS CART PROCEDURE
-Alter PROCEDURE processCart 
+CREATE PROCEDURE processCart 
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -135,7 +135,7 @@ GO
 ---------------------------
 
 -- tblGAME: InsertGame
-Alter PROCEDURE insertGame
+CREATE PROCEDURE insertGame
 @GName varchar(50),
 @GReleaseDate DATE,
 @GDescription varchar(100),
@@ -188,7 +188,7 @@ GO
 
 
 -- tblREVIEW: InsertReview
-ALTER PROCEDURE insertREVIEW
+CREATE PROCEDURE insertREVIEW
 @RRating		float,
 @RContent		varchar(255),
 @RDate			DATE,
@@ -215,7 +215,7 @@ EXEC getOrderGameID
 @OGID = @OG_ID OUTPUT
 IF @OG_ID IS NULL
 BEGIN
-	RAISERROR('ParentRateID cannot be null', 11,1)
+	RAISERROR('OrderGameID cannot be null', 11,1)
 	RETURN
 END
 
@@ -238,7 +238,7 @@ GO
 
 
 -- Insert Procedure: tblPlatformPriceHistory --
-ALTER PROCEDURE getGamePlatformID
+CREATE PROCEDURE getGamePlatformID
 @GN VARCHAR(50),
 @PN VARCHAR(50),
 @GPID INT OUTPUT
@@ -270,7 +270,7 @@ SET @GPID = (SELECT GamePlatformID FROM tblGamePlatform
 
 GO
 
-ALTER PROCEDURE insPlatformPriceHistory
+CREATE PROCEDURE insPlatformPriceHistory
 @G_Name VARCHAR(50),
 @P_Name VARCHAR(50),
 @H_Price MONEY,
@@ -304,7 +304,7 @@ BEGIN TRAN addPlatformPriceHistory
 GO 
 
 -- Insert Procedure: tblGamePlatform --
-Alter PROCEDURE insGamePlatform
+CREATE PROCEDURE insGamePlatform
 @GN VARCHAR(50),
 @PN VARCHAR(50),
 @ReleaseDate DATE
@@ -347,7 +347,7 @@ GO
 -- Creator: Andi Ren --
 -----------------------
 
-Alter PROCEDURE InsertGamer 
+CREATE PROCEDURE InsertGamer 
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -377,7 +377,7 @@ BEGIN TRAN g1
         COMMIT TRAN g1
 GO
 
-Alter PROCEDURE InsertGAMER_INTEREST
+CREATE PROCEDURE InsertGAMER_INTEREST
 @Fname VARCHAR(50),
 @Lname VARCHAR(50),
 @DOB DATE,
@@ -422,7 +422,7 @@ BEGIN TRAN g1
         COMMIT TRAN g1
 GO
 
-ALTER PROCEDURE InsertDEVELOPER_GAME
+CREATE PROCEDURE InsertDEVELOPER_GAME
 @DevName	VARCHAR(50),
 @GName		VARCHAR(50)
 AS

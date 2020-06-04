@@ -1,5 +1,10 @@
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
+
+/*
+    Before running, please import game-data.csv file as a table called 'tempGameInfo'
+    for the code below to run properly
+*/
 
 EXEC insertGame
 @GName = 'Animal Crossing: New Horizons',
@@ -64,9 +69,6 @@ DECLARE @TempTable TABLE (
 
 INSERT INTO @TempTable
     SELECT * FROM tempGameInfo
-
-SELECT * FROM @TempTable
-SELECT * FROM tblGENRE_TYPE
 
 DECLARE @NumRow INT = (SELECT COUNT(*) FROM @TempTable)
 WHILE @NumRow > 0
@@ -144,9 +146,6 @@ END
 -- DBCC CHECKIDENT (tblGamePlatform, RESEED, 0)
 -- DBCC CHECKIDENT (tblGame, RESEED, 0)
 
-SELECT * FROM tblPublisher
-SELECT * FROM tblGAME
-
 --insert data into bridge tables by Andi-- 
 
 DECLARE @games INT = (SELECT COUNT(*) FROM tblGAME)
@@ -205,8 +204,19 @@ END
 
 GO
 
-SELECT * FROM [dbo].[tblGAME_KEYWORD]
-SELECT * FROM [dbo].[tblGAME_LANGUAGE]
-SELECT * FROM [dbo].[tblGAME_REGION_SALES]
-SELECT * FROM [dbo].[tblGamePublisher]
+-- SELECT * FROM [dbo].[tblGAME_KEYWORD]
+-- SELECT * FROM [dbo].[tblGAME_LANGUAGE]
+-- SELECT * FROM [dbo].[tblGAME_REGION_SALES]
+-- SELECT * FROM [dbo].[tblGamePublisher]
 
+-- Restart
+-- DELETE FROM tblDEVELOPER_GAME
+-- DELETE FROM tblGAME_KEYWORD
+-- DELETE FROM tblGAME_LANGUAGE
+-- DELETE FROM tblGAME_REGION_SALES
+-- DELETE FROM tblGamePublisher
+-- DBCC CHECKIDENT (tblGAME_KEYWORD, RESEED, 0)
+-- DBCC CHECKIDENT (tblGAME_LANGUAGE, RESEED, 0)
+-- DBCC CHECKIDENT (tblGAME_REGION_SALES, RESEED, 0)
+-- DBCC CHECKIDENT (tblGamePublisher, RESEED, 0)
+-- DBCC CHECKIDENT (tblDEVELOPER_GAME, RESEED, 0)

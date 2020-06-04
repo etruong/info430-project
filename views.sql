@@ -1,4 +1,4 @@
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
 
 --------------------
@@ -54,7 +54,7 @@ FROM tblGAMER AS g
     JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
     JOIN (
         SELECT g.GamerAge, gt.GenreTypeName, SUM(og.OrderGameQty) AS NumOrder, 
-            RANK() OVER (PARTITION BY gt.GenreTypeName ORDER BY SUM(og.OrderGameQty)) AS GenreRank
+            DENSE_RANK() OVER (PARTITION BY g.GamerAge ORDER BY SUM(og.OrderGameQty) DESC) AS GenreRank
         FROM tblGAMER AS g 
             JOIN tblOrder AS o ON o.GamerID = g.GamerID
             JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
@@ -64,7 +64,7 @@ FROM tblGAMER AS g
     ) AS sq1 ON sq1.GamerAge = g.GamerAge 
     JOIN (
         SELECT g.GamerAge, p.PerpName, SUM(og.OrderGameQty) AS NumOrder, 
-            RANK() OVER (PARTITION BY p.PerpName ORDER BY SUM(og.OrderGameQty)) AS PerpRank
+            DENSE_RANK() OVER (PARTITION BY g.GamerAge ORDER BY SUM(og.OrderGameQty) DESC) AS PerpRank
         FROM tblGAMER AS g 
             JOIN tblOrder AS o ON o.GamerID = g.GamerID
             JOIN tblORDER_GAME AS og ON og.OrderID = o.OrderID
@@ -76,7 +76,7 @@ WHERE
     PerpRank = 1 AND 
     GenreRank = 1
 GROUP BY g.GamerAge, sq1.GenreTypeName, sq2.PerpName
-GO 
+GO
 
 ---------------------------
 -- Creator: Marcus Huang --

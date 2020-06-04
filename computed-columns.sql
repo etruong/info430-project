@@ -1,57 +1,12 @@
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO
- 
+
 ----------------------
 -- COMPUTED COLUMNS --
 ----------------------
 
----------------------------
--- Creator: Elisa Truong --
----------------------------
-
--- HistoryCurrent for tblPlatform_Price_History
-CREATE FUNCTION isPriceCurrent(@Start DATE, @End DATE)
-RETURNS BIT 
-AS
-BEGIN
-    DECLARE @RET BIT = 0
-    DECLARE @CurrentDate DATE = (SELECT GETDATE())
-    IF (@End IS NULL OR @CurrentDate BETWEEN @START AND @END)
-    BEGIN 
-        SET @RET = 1
-    END 
-    RETURN @RET
-END
-GO 
-
-ALTER TABLE tblPlatform_Price_History
-ADD HistoryCurrent AS dbo.isPriceCurrent(HistoryStart, HistoryEnd)
-GO
-
--- PriceRange for tblGAME
-CREATE FUNCTION PriceRange(@GameID INT)
-RETURNS VARCHAR(50)
-AS 
-BEGIN 
-    DECLARE @MAX MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice DESC)
-    DECLARE @MIN MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice ASC)
-	DECLARE @RET VARCHAR(50)
-	IF @MAX IS NULL AND @MIN IS NULL 
-		RETURN NULL
-    SET @RET = (SELECT CONCAT(@MAX, ' - ', @MIN))
-    RETURN @RET
-END
-GO 
-
-ALTER TABLE tblGAME 
-ADD PriceRange AS dbo.PriceRange(GameID)
-GO
-
----------------------------
--- Creator: Marcus Huang --
----------------------------
-
 --NumOfGamesBought (Gamer Table) � must be unique
+-- Creator: Marcus Huang --
 CREATE FUNCTION numGamesBought(@GamerID INT)
 RETURNS INT
 AS
@@ -70,7 +25,28 @@ ADD NumBought
 AS dbo.numGamesBought(GamerID)
 GO
 
+-- HistoryCurrent for tblPlatform_Price_History
+-- Creator: Elisa Truong --
+CREATE FUNCTION isPriceCurrent(@Start DATE, @End DATE)
+RETURNS BIT 
+AS
+BEGIN
+    DECLARE @RET BIT = 0
+    DECLARE @CurrentDate DATE = (SELECT GETDATE())
+    IF (@End IS NULL OR @CurrentDate BETWEEN @START AND @END)
+    BEGIN 
+        SET @RET = 1
+    END 
+    RETURN @RET
+END
+GO 
+
+ALTER TABLE tblPlatform_Price_History
+ADD HistoryCurrent AS dbo.isPriceCurrent(HistoryStart, HistoryEnd)
+GO
+
 --GameCurrentPrice (GamePlatform table)
+-- Creator: Marcus Huang --
 CREATE FUNCTION gameCurrentPrice(@GamePlatformID INT)
 RETURNS INT
 AS
@@ -89,17 +65,35 @@ ADD CurrentPrice
 AS dbo.gameCurrentPrice(GamePlatformID)
 GO
 
-------------------------
--- Creator: Angel Lin --
-------------------------
+-- PriceRange for tblGAME
+-- Creator: Elisa Truong --
+CREATE FUNCTION PriceRange(@GameID INT)
+RETURNS VARCHAR(50)
+AS 
+BEGIN 
+    DECLARE @MAX MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice DESC)
+    DECLARE @MIN MONEY = (SELECT TOP 1 CurrentPrice FROM tblGamePlatform WHERE GameID = @GameID ORDER BY CurrentPrice ASC)
+	DECLARE @RET VARCHAR(50)
+	IF @MAX IS NULL AND @MIN IS NULL 
+		RETURN NULL
+    SET @RET = (SELECT CONCAT(@MAX, ' - ', @MIN))
+    RETURN @RET
+END
+GO 
+
+ALTER TABLE tblGAME 
+ADD PriceRange AS dbo.PriceRange(GameID)
+GO
 
 -- Computed Column: Age of Gamer (Gamer Table) --
+-- Creator: Angel Lin --
 ALTER TABLE tblGAMER
 ADD GamerAge
 AS (CONVERT(INT,CONVERT(CHAR(8),GETDATE(),112))-CONVERT(CHAR(8),GamerDOB,112))/10000 
 GO
 
 -- Computed Column: Most Recently Bought Game (Gamer Table) --
+-- Creator: Angel Lin --
 CREATE FUNCTION recentBoughtGame(@PK INT)
 RETURNS VARCHAR(50)
 AS
@@ -120,10 +114,7 @@ ALTER TABLE tblGAMER
 ADD recentBoughtGame AS dbo.recentBoughtGame(GamerID)
 GO
 
------------------------
 -- Creator: Andi Ren --
------------------------
-
 CREATE FUNCTION AverageReview(@GameID INT)
 RETURNS FLOAT
 AS
@@ -137,6 +128,11 @@ BEGIN
 END
 GO
 
+ALTER TABLE tblGAME
+ADD AvgReview AS dbo.AverageReview(GameID)
+GO
+
+-- Creator: Andi Ren --
 CREATE FUNCTION LanguageNum(@GameID INT)
 RETURNS INT
 AS
@@ -147,10 +143,6 @@ BEGIN
 	WHERE G.GameID = @GameID
 	)
 END
-GO
-
-ALTER TABLE tblGAME
-ADD AvgReview AS dbo.AverageReview(GameID)
 GO
 
 ALTER TABLE tblGAME

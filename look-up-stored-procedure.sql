@@ -2,10 +2,10 @@
 -- LOOK UP STORED PROCEDURES --
 -------------------------------
 
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
 
-ALTER PROCEDURE getGameID
+CREATE PROCEDURE getGameID
 @GName VARCHAR(50),
 @GID INT OUTPUT 
 AS
@@ -13,14 +13,14 @@ SET @GID = (SELECT GameID FROM tblGAME
     WHERE GameName = @GName)
 GO 
 
-ALTER PROCEDURE getKeywordID 
+CREATE PROCEDURE getKeywordID 
 @KeyName VARCHAR(50),
 @KeyID INT OUTPUT 
 AS 
 SET @KeyID = (SELECT KeywordID FROM tblKEYWORD WHERE KeywordName = @KeyName)
 GO
 
-ALTER PROCEDURE getPlatformID
+CREATE PROCEDURE getPlatformID
 @PName VARCHAR(50),
 @PID INT OUTPUT
 AS 
@@ -28,7 +28,7 @@ SET @PID = (SELECT PlatformID FROM tblPlatform
     WHERE PlatformName = @PName)
 GO
 
-ALTER PROCEDURE getGenderID
+CREATE PROCEDURE getGenderID
 @GName VARCHAR(50),
 @GID INT OUTPUT
 AS 
@@ -36,7 +36,7 @@ SET @GID = (SELECT GenderID FROM tblGender
     WHERE GenderName = @GName)
 GO
 
-ALTER PROCEDURE getLanguageID 
+CREATE PROCEDURE getLanguageID 
 @LangName VARCHAR(50),
 @LangID INT OUTPUT 
 AS 
@@ -44,7 +44,7 @@ SET @LangID = (SELECT LanguageID FROM tblLANGUAGE
     WHERE LanguageName = @LangName)
 GO 
 
-ALTER PROCEDURE getGamerID 
+CREATE PROCEDURE getGamerID 
 @G_Fname VARCHAR(50),
 @G_Lname VARCHAR(50),
 @G_Gender VARCHAR(50),
@@ -66,7 +66,7 @@ SET @G_ID = (SELECT GamerID FROM tblGAMER
     GenderID = @Gender_ID)
 GO
 
-Alter PROCEDURE getPerspective
+CREATE PROCEDURE getPerspective
 @PerName VARCHAR(50),
 @PerID INT OUTPUT 
 AS 
@@ -74,7 +74,7 @@ SET @PerID = (SELECT PerpID FROM tblPERSPECTIVE
     WHERE PerpName = @PerName)
 GO 
 
-Alter PROCEDURE getRegionID
+CREATE PROCEDURE getRegionID
 @RegName VARCHAR(20),
 @Reg_ID INT OUTPUT
 AS
@@ -83,7 +83,7 @@ SET @Reg_ID = (SELECT RegionID
 			  WHERE @RegName = RegionName)
 GO
 
-Alter PROCEDURE getGenreTypeID
+CREATE PROCEDURE getGenreTypeID
 @GTypeName VARCHAR(20),
 @GType_ID INT OUTPUT
 AS
@@ -92,7 +92,7 @@ SET @GType_ID = (SELECT GenreTypeID
 			  WHERE @GTypeName = GenreTypeName)
 GO
 
-Alter PROCEDURE getParentRateID
+CREATE PROCEDURE getParentRateID
 @PRateName VARCHAR(20),
 @PRate_ID INT OUTPUT
 AS
@@ -101,21 +101,53 @@ SET @PRate_ID = (SELECT ParentRateID
 				WHERE @PRateName = ParentRateName)
 GO
 
-ALTER PROCEDURE GetDeveloperID
+CREATE PROCEDURE GetDeveloperID
 @DevName	varchar(50),
 @DevID		INT OUTPUT
 AS 
 SET @DevID = (SELECT DeveloperID FROM tblDEVELOPER WHERE DeveloperName = @DevName)
 GO
 
-ALTER PROCEDURE GetPublisherID
+CREATE PROCEDURE GetPublisherID
 @PubName	varchar(50),
 @PubID		INT OUTPUT
 AS 
 SET @PubID = (SELECT PublisherID FROM tblPublisher WHERE PublisherName = @PubName)
 GO
 
-ALTER PROCEDURE getOrderGameID
+CREATE PROCEDURE getOrderID
+@GFname varchar(50),
+@GLname varchar(50),
+@Gender varchar(50),
+@GDOB DATE,
+@ODate DATE,
+@OTotal numeric (5,2),
+@OID INT OUTPUT
+AS
+
+DECLARE @GmerID INT
+
+EXEC getGamerID
+@G_Fname = @GFname,
+@G_Lname = @GLname,
+@G_Gender = @Gender,
+@G_DOB = @GDOB,
+@G_ID = @GmerID OUTPUT
+IF @GmerID IS NULL 
+BEGIN 
+    RAISERROR('Gamer ID cannot be null!', 11, 1)
+    RETURN
+END
+
+SET @OID = (SELECT OrderID 
+				FROM tblORDER 
+				WHERE GamerID = @GmerID
+				AND OrderDate = @ODate
+				AND OrderTotal = @OTotal
+				)
+GO
+
+CREATE PROCEDURE getOrderGameID
 @GName VARCHAR(50),
 @PName VARCHAR(50),
 @Fname VARCHAR(50),
@@ -169,36 +201,4 @@ AND OrderID = @OID
 AND PlatformID = @PID
 )
 
-GO
-
-Alter PROCEDURE getOrderID
-@GFname varchar(50),
-@GLname varchar(50),
-@Gender varchar(50),
-@GDOB DATE,
-@ODate DATE,
-@OTotal numeric (5,2),
-@OID INT OUTPUT
-AS
-
-DECLARE @GmerID INT
-
-EXEC getGamerID
-@G_Fname = @GFname,
-@G_Lname = @GLname,
-@G_Gender = @Gender,
-@G_DOB = @GDOB,
-@G_ID = @GmerID OUTPUT
-IF @GmerID IS NULL 
-BEGIN 
-    RAISERROR('Gamer ID cannot be null!', 11, 1)m 
-    RETURN
-END
-
-SET @OID = (SELECT OrderID 
-				FROM tblORDER 
-				WHERE GamerID = @GmerID
-				AND OrderDate = @ODate
-				AND OrderTotal = @OTotal
-				)
 GO

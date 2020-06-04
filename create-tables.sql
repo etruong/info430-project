@@ -1,10 +1,22 @@
-DROP DATABASE IF EXISTS info430_gp10_VideoGame
+/*
+    Please run code in the following order:
+    1. create-tables.sql            (Create tables and populates look up tables)
+    2. computed-columns.sql         (Create computed columns)
+    3. business-rule.sql            (Create business rules for db)
+    4. look-up-stored-procedure.sql (Create stored procs for getID of a table)
+    5. stored-procedures.sql        (Stored procs that are not getID)
+    6. views.sql                    (Views of database)
+    7. insert-tblGame.sql           (Inserts data information from external csv file)
+    8. synthetic-tran.sql           (Synthetic transaction wrapper to fill database)
+*/
+
+DROP DATABASE IF EXISTS Proj_A10
 GO
 
-CREATE DATABASE info430_gp10_VideoGame
+CREATE DATABASE Proj_A10
 GO
 
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
 
 -- [ Create Look up tables ] --
@@ -13,9 +25,6 @@ CREATE TABLE tblPERSPECTIVE
     PerpName varchar(20),
     PerpDescription varchar(600))
 GO
-
-ALTER TABLE tblPERSPECTIVE
-ALTER COLUMN PerpDescription VARCHAR(600)
 
 CREATE TABLE tblLANGUAGE
     (LanguageID INT IDENTITY(1,1) primary key,
@@ -98,7 +107,10 @@ VALUES
 	('Adventure', 'Players interact with their environment and other characters'),
 	('Role-Playing', 'Featured medieval or fantasy settings'),
 	('Simulation', 'Designed to emulate real or fictional reality'),
-	('Strategy', 'Gives platers a godlike access to the world and its resources')
+	('Strategy', 'Gives platers a godlike access to the world and its resources'),
+    ('Sport', 'A way to play sports but without the sweat'),
+    ('Fighting', 'Violence with fist on fist action'),
+    ('Shooter', 'Guns, Violence, and Action whats not to like')
 GO
 
 INSERT INTO tblPARENT_RATE(ParentRateName, ParentRateDescription)
@@ -190,7 +202,12 @@ VALUES
     ('Stadia', 'The Google Stadia cloud gaming platform'),
     ('PC', 'The Microsoft Windows systen Personal Computer platform'),
     ('Mac', 'The Apple iOS System Personal Computer platform'),
-    ('Switch', 'The Nintendo Switch Handheld gaming console platform')
+    ('Switch', 'The Nintendo Switch Handheld gaming console platform'),
+    ('Wii', 'The Nintendo gaming console platform'),
+    ('Wii U', 'The Nintendo gaming console platform extending the Wii'),
+    ('3DS', 'The Nintendo 3DS handheld gaming console platform'),
+    ('2DS', 'The Nintendo 2DS handheld gaming console platform'),
+    ('GameCube', 'The Nintendo gaming console platform')
 GO
 
 INSERT INTO tblPUBLISHER (PublisherName, PublisherDescription)

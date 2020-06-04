@@ -1,4 +1,4 @@
-USE info430_gp10_VideoGame
+USE Proj_A10
 GO 
 --------------------
 -- BUSINESS RULES --
@@ -188,3 +188,9 @@ ADD CONSTRAINT check_order_positive CHECK (OrderGameQty > 0);
 -----------------------
 -- Creator: Andi Ren --
 -----------------------
+
+ALTER TABLE [dbo].[tblORDER]
+ADD CONSTRAINT OrderDate CHECK (OrderDate <= GetDate());
+
+ALTER TABLE [dbo].[tblReview]
+ADD CONSTRAINT ReviewDate CHECK (ReviewDate <= GetDate());
